@@ -18,8 +18,37 @@ public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
 
+    // uid 중복 확인
+    public boolean isUidDuplication(String uid) {
+        return userRepository.existsByUid(uid);
+    }
+
+    // nickname 중복 확인
+    public boolean isNicknameDuplication(String nickname) {
+        return userRepository.existsByNickname(nickname);
+    }
+
+    // email 중복 확인
+    public boolean isEmailDuplication(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    // phone 중복 확인
+    public boolean isPhoneDuplication(String phone) {
+        return userRepository.existsByPhone(phone);
+    }
+
     // 회원 가입
     public UserDTO createUser(UserDTO userDTO) {
+        if(isUidDuplication(userDTO.getUid())) {
+            throw new IllegalArgumentException("중복된 아이디가 존재합니다");
+        } else if(isNicknameDuplication(userDTO.getNickname())) {
+            throw new IllegalArgumentException("중복된 닉네임이 존재합니다");
+        } else if(isEmailDuplication(userDTO.getEmail())) {
+            throw new IllegalArgumentException("중복된 이메일이 존재합니다");
+        } else if(isPhoneDuplication(userDTO.getPhone())) {
+            throw new IllegalArgumentException("중복된 휴대폰 번호가 존재합니다");
+        }
         UserEntity userEntity = userDTO.dtoToEntity();
         UserEntity savedUser = userRepository.save(userEntity);
         logger.info("회원가입 완료!");
@@ -35,10 +64,17 @@ public class UserService {
         return userDTO;
     }
 
-    // id 회원 조회
+    // id로 회원 조회
     public UserDTO findById(Long id){
         UserEntity userEntity = userRepository.findById(id).orElseThrow();
         logger.info(id + "번 유저 조회 완료!");
+        return UserDTO.entityToDto(userEntity);
+    }
+
+    // uid로 회원 조회
+    public UserDTO findByUid(String uid){
+        UserEntity userEntity = userRepository.findByUid(uid);
+        logger.info(uid + " 유저 조회 완료!");
         return UserDTO.entityToDto(userEntity);
     }
 
@@ -51,6 +87,15 @@ public class UserService {
         userEntity.setNickname(userDTO.getNickname());
         userEntity.setEmail(userDTO.getEmail());
         userEntity.setPhone(userDTO.getPhone());
+        if(isUidDuplication(userDTO.getUid())) {
+            throw new IllegalArgumentException("중복된 아이디가 존재합니다");
+        } else if(isNicknameDuplication(userDTO.getNickname())) {
+            throw new IllegalArgumentException("중복된 닉네임이 존재합니다");
+        } else if(isEmailDuplication(userDTO.getEmail())) {
+            throw new IllegalArgumentException("중복된 이메일이 존재합니다");
+        } else if(isPhoneDuplication(userDTO.getPhone())) {
+            throw new IllegalArgumentException("중복된 휴대폰 번호가 존재합니다");
+        }
         UserEntity updatedUser = userRepository.save(userEntity);
         logger.info(id + "번 사용자 정보 업데이트 완료!");
         return UserDTO.entityToDto(updatedUser);

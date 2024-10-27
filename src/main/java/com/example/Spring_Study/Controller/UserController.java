@@ -27,10 +27,16 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    // Id 회원조회
-    @GetMapping("/{id}")
+    // id로 회원조회
+    @GetMapping("/id/{id}")
     public ResponseEntity<UserDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.findById(id));
+    }
+
+    // uid로 회원조회
+    @GetMapping("/uid/{uid}")
+    public ResponseEntity<UserDTO> findByUid(@PathVariable String uid) {
+        return ResponseEntity.ok(userService.findByUid(uid));
     }
 
     // 회원 수정
