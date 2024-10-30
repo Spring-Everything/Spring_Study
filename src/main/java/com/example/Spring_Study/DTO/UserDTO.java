@@ -3,6 +3,8 @@ package com.example.Spring_Study.DTO;
 import com.example.Spring_Study.Entity.UserEntity;
 import lombok.*;
 
+import java.util.HashSet;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -30,6 +32,6 @@ public class UserDTO {
     }
 
     public UserEntity dtoToEntity(){
-        return new UserEntity(id, uid, password, name, nickname, email, phone);
+        return new UserEntity(id, uid, password, name, nickname, email, phone, new HashSet<>());
     }
 }

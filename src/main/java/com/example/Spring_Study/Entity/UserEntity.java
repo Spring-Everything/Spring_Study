@@ -1,10 +1,10 @@
 package com.example.Spring_Study.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity(name = "users")
 @NoArgsConstructor
@@ -22,4 +22,10 @@ public class UserEntity {
     private String nickname;
     private String email;
     private String phone;
+
+    // 유저가 좋아요를 누른 게시물 ID 목록
+    @ElementCollection
+    @CollectionTable(name = "user_liked_posts", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "post_id")
+    private Set<Long> likedPosts = new HashSet<>();
 }
