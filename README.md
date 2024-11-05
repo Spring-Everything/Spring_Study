@@ -10,6 +10,12 @@
 - yml
 
 ## 📝 기록지
+### 📚 자바 상식
+- 변수를 초기화 하지 않았을 때 발생하는 문제 (좋아요 등의 수 증가 등등 ,,, )
+  - `NullPointerException` - JVM이 이 null 값을 수치 연산에 사용하려고 시도하여 `NullPointerException`을 발생시키는 것. 그러니 항상 초기화를 시켜주자
+    - 엔티티에 초기값 설정을 할 수 있지만 난 함수에 적용하는게 더 편한듯,,,
+-
+
 ### 📚 `findAll()`, `Stream()`, `map()`, `collect()`, `Collectors.toList()` 함수
     List<UserDTO> userDTO = userRepository.findAll().stream()
                 .map(UserDTO::entityToDto)
@@ -144,8 +150,36 @@
     - 🤔 위 코드 분석
       - 해당 유저가 생성한 버킷, 메세지를 순차적으로 삭제하고 최종적으로 해당 유저를 삭제함
 
-### 📚 자바 상식
-- 변수를 초기화 하지 않았을 때 발생하는 문제 (좋아요 등의 수 증가 등등 ,,, )
-  - `NullPointerException` - JVM이 이 null 값을 수치 연산에 사용하려고 시도하여 `NullPointerException`을 발생시키는 것. 그러니 항상 초기화를 시켜주자
-    - 엔티티에 초기값 설정을 할 수 있지만 난 함수에 적용하는게 더 편한듯,,,
-- 
+### 🔐 JWT
+- 🤔 들어가기 전에 JWT란?
+  - 사용자 인증과 정보 교환을 위한 압축된 JSON 기반의 토큰
+  - 주로 무상태 인증을 위해 사용되며, 토큰 자체에 인증과 관련된 정보를 포함하고 있어 서버에 사용자 세션을 저장할 필요가 없음
+    - 구성
+      1. Header : 토큰 타입(JWT)과 서명 알고리즘(예: HS256)을 지정하는 정보를 포함
+      2. Payload : 인증과 관련된 사용자 정보와 추가 클레임(예: 사용자 ID, 권한 등)을 포함
+      3. Signature : 토큰의 무결성을 확인하기 위해 Header와 Payload를 서버의 비밀키로 서명한 값
+- `Spring Security`에서 `UserDetails` 인터페이스
+  -     Collection<? extends GrantedAuthority> getAuthorities()
+    - 사용자의 권한 정보를 반환하는 메서드
+    - 사용자 권한 정보를 반환하여 접근 제어에 활용
+  -     String getPassword()
+    - 사용자의 비밀번호를 반환하는 메서드
+    - 사용자의 비밀번호를 반환하여 로그인 시 인증 용도로 사용
+  -     String getUsername()
+    - 사용자의 고유 식별자(주로 사용자 이름 또는 ID)를 반환하는 메서드
+    - 사용자 식별자를 반환하여 JWT의 subject로 설정 가능
+      1. id도 기본키로 고유하여 해당 메서드의 조건을 만족함 
+      2. 하지만 이 메서드는 기본적으로 사용자 로그인이나 인증 관련 작업에서 사용되므로, uid나 email 같은 사용자 식별용 필드로 설정하는 것이 일반적
+      3. 즉 id로 설정할 경우 이를 사용하는 로직에서 예상치 못한 영향을 받을 수 있으므로 웬만하면 uid로 설정해주자
+  -     boolean isAccountNonExpired()
+    - 계정이 만료되었는지를 나타내는 메서드
+    - 계정 만료 여부를 반환하여 계정 사용 가능 여부 설정
+  -     boolean isAccountNonLocked()
+    - 계정이 잠겨있는지를 나타내는 메서드
+    - 계정 잠금 여부를 반환하여 로그인 제한 가능
+  -     boolean isCredentialsNonExpired()
+    - 자격 증명(비밀번호)이 만료되었는지를 나타내는 메서드
+    - 비밀번호 만료 여부를 반환하여 접근 제한 설정 가능
+  -     boolean isEnabled()
+    - 계정이 활성화되었는지를 나타내는 메서드
+    - 계정 활성화 여부를 반환하여 계정 접근 가능 여부 설정

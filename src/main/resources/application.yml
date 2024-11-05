@@ -1,4 +1,8 @@
 spring:
+  config:
+    activate:
+      on-profile: prod
+
   application:
     name:
       Spring_Study
