@@ -150,7 +150,7 @@
     - 🤔 위 코드 분석
       - 해당 유저가 생성한 버킷, 메세지를 순차적으로 삭제하고 최종적으로 해당 유저를 삭제함
 
-### 🔐 JWT
+### 📚 JWT
 - 🤔 들어가기 전에 JWT란?
   - 사용자 인증과 정보 교환을 위한 압축된 JSON 기반의 토큰
   - 주로 무상태 인증을 위해 사용되며, 토큰 자체에 인증과 관련된 정보를 포함하고 있어 서버에 사용자 세션을 저장할 필요가 없음
@@ -183,3 +183,74 @@
   -     boolean isEnabled()
     - 계정이 활성화되었는지를 나타내는 메서드
     - 계정 활성화 여부를 반환하여 계정 접근 가능 여부 설정
+
+### 📚 해당 테이블에 각각의 다른 테이블 값 넣기 / 무한 순환 참조 방지
+- 🤔 들어가기 전에
+  - 저번에 해커톤을 하다가 각 유저에 고유한 도전과제 데이터를 넣어서 조회할때 각 유저마다 도전과제의 필드 값을 따로따로 조회시켜야했다
+  - 그냥 데이터 넣으면 될줄알고 각 유저에 도전과제 필드값을 넣어서 조회 시켰더니 캡스톤때처럼 유저가 도전과제를 조회하고 도전과제가 유저를 조회하여 무한 순환 참조를 하는 경악스러운 일이 발생하였다
+  - 문제는 단순했다 그냥 도전과제 필드에 유저 정보를 조회하는 필드 값을 null로 설정하면 됐었던 것
+  - 따라서 이번 연습을 통해 복습해보자
+
+- 🤔 테이블 참조에 대한 무한 순환 참조 방지 방법
+
+  - 이 구현 단계에서는 유저(UserEntity)와 도전과제(ChallengeEntity) 간의 양방향 관계를 설정하여 각 유저마다 고유한 도전과제 데이터를 조회할 수 있도록 구조를 짰다
+    - 이로인해 이로 인해 무한 순환 참조가 발생할 수 있으므로 아래와 같이 user 필드를 null로 설정하여 해결
+    -     public ChallengeEntity dtoToEntity(){
+              return new ChallengeEntity(id, title, description, isAchieved, achievedAt, requiredLikeCount, null);
+          }
+
+- 🤔 테이블과 테이블 간의 양방향 관계를 설정하는 방법
+
+- `challenge` `setChallenge`
+- @OneToMany 관계로 설정된 challenge 필드는 유저가 가진 도전과제 리스트를 참조하며, mappedBy = "user"는 ChallengeEntity에서 이 필드가 유저를 참조하는 필드임을 나타냄
+- CascadeType.ALL로 설정하여 유저 엔티티에 변화가 있을 때 연관된 도전과제 엔티티에도 함께 반영됨
+- setChallenge 메서드는 도전과제 리스트를 설정하면서 각 도전과제의 유저 필드에 this를 설정하여 양방향 관계를 완성
+  -     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+        private List<ChallengeEntity> challenge;
+
+        public void setChallenge(List<ChallengeEntity> challenges) {
+            this.challenge = challenges;
+            if (challenges != null) {
+                challenges.forEach(challenge -> challenge.setUser(this));
+            }
+        }
+
+- `entityToDto`
+  - 아래와 같이 `UserEntity` 객체를 `UserDTO로` 변환 후
+  - `UserEntity`의 도전과제 리스트를 `ChallengeDTO` 리스트로 변환하여 `UserDTO`에 추가
+  - 유저가 도전과제를 가지고 있는지 확인하고, 없을 경우 빈 리스트를 반환하여 `NullPointerException`을 방지
+    -     public static UserDTO entityToDto(UserEntity userEntity){
+              List<ChallengeDTO> challengeDTO = userEntity.getChallenge() != null
+                  ? userEntity.getChallenge().stream().map(ChallengeDTO::entityToDto).collect(Collectors.toList())
+                  : Collections.emptyList();
+              return new UserDTO(
+                userEntity.getId(),
+                userEntity.getUid(),
+                userEntity.getPassword(),
+                userEntity.getName(),
+                userEntity.getNickname(),
+                userEntity.getEmail(),
+                userEntity.getPhone(),
+                userEntity.getLikeCount(),
+                challengeDTO
+                );
+              }
+
+- `dtoToEntity`
+  - `UserDTO` 객체를 `UserEntity`로 변환
+  - `ChallengeDTO` 리스트를 `ChallengeEntity` 리스트로 변환하여 `UserEntity`의 도전과제 필드에 설정
+  - `UserEntity` 객체 생성 후, 도전과제 리스트가 존재하면 `setChallenge` 메서드를 통해 유저와 도전과제 간의 양방향 참조 관계를 설정
+    -     public UserEntity dtoToEntity(){
+              UserEntity userEntity = new UserEntity(id, uid, password, name, nickname, email, phone, likeCount, new HashSet<>(), new ArrayList<>());
+              List<ChallengeEntity> challengeEntity = challenge != null
+                  ? challenge.stream().map(ChallengeDTO::dtoToEntity).collect(Collectors.toList())
+                  : Collections.emptyList();
+              userEntity.setChallenge(challengeEntity);
+              return userEntity;
+          }
+
+
+- 전체 구조 정리
+  1. `entityToDto` 와 `dtoToEntity` 메서드를 통해 엔티티와 DTO 간 변환을 수행하며 양방향 관계를 적절히 유지
+  2. `setChallenge` 메서드를 통해 `ChallengeEntity`의 `user` 필드에 현재 `UserEntity` 객체를 설정하여 무한 순환 참조 없이 데이터 조회가 가능하도록 구현
+  3. `CascadeType.ALL` 설정으로 유저와 도전과제 간의 관계에서 데이터의 추가, 삭제, 갱신이 유기적으로 구현

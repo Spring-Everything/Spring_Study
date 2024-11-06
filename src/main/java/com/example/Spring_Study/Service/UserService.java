@@ -1,7 +1,10 @@
 package com.example.Spring_Study.Service;
 
+import com.example.Spring_Study.Entity.ChallengeEntity;
 import com.example.Spring_Study.Entity.UserEntity;
 import com.example.Spring_Study.DTO.UserDTO;
+import com.example.Spring_Study.Enum.StatusEnum;
+import com.example.Spring_Study.Repository.ChallengeRepository;
 import com.example.Spring_Study.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +21,16 @@ public class UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
+    private final ChallengeRepository challengeRepository;
+
+    // 챌린지 디폴트 데이터
+    private void createDefaultBadges(UserEntity user) {
+        List<Integer> likeCounts = List.of(1, 5, 10, 20, 30, 50, 100, 300, 500);
+        List<ChallengeEntity> defaultBadges = IntStream.rangeClosed(1, 9)
+                .mapToObj(i -> new ChallengeEntity(null, likeCounts.get(i - 1) + "번 좋아요 누르기", "좋아요를 " + likeCounts.get(i - 1) + "번 누르면 챌린지 성공!", StatusEnum.진행중, null, likeCounts.get(i - 1), user))
+                .collect(Collectors.toList());
+        challengeRepository.saveAll(defaultBadges);
+    }
 
     // uid 중복 확인
     public boolean isUidDuplication(String uid) {
@@ -52,6 +66,7 @@ public class UserService {
         UserEntity userEntity = userDTO.dtoToEntity();
         UserEntity savedUser = userRepository.save(userEntity);
         logger.info("회원가입 완료!");
+        createDefaultBadges(savedUser);
         return UserDTO.entityToDto(savedUser);
     }
 
@@ -105,7 +120,7 @@ public class UserService {
     public UserDTO deleteUser(Long id){
         UserEntity userEntity = userRepository.findById(id).orElseThrow();
         userRepository.delete(userEntity);
-        logger.info(id + "번 사용자 탈퇴 완료! ");
+        logger.info(id + "번 사용자 탈퇴 완료!");
         return UserDTO.entityToDto(userEntity);
     }
 }

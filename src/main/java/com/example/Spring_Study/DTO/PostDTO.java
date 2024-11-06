@@ -13,8 +13,8 @@ public class PostDTO {
     private Long id;
     private String title;
     private String content;
-    private Long likes;
-    private Long infinityLike;
+    private int likes;
+    private int infinityLike;
     private Long userId;
     private UserDTO user;
 

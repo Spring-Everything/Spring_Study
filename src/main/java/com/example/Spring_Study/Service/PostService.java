@@ -20,6 +20,7 @@ public class PostService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final ChallengeService challengeService;
 
     // 게시글 작성
     public PostDTO createPost(Long userId, PostDTO postDTO) {
@@ -73,16 +74,16 @@ public class PostService {
     public PostDTO likePost(Long userId, Long postId) {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow();
         PostEntity postEntity = postRepository.findById(postId).orElseThrow();
-        if (postEntity.getLikes() == null) {
-            postEntity.setLikes(0L);
-        }
         if (userEntity.getLikedPosts().contains(postId)) {
             userEntity.getLikedPosts().remove(postId);
             postEntity.setLikes(postEntity.getLikes() - 1);
+            userEntity.setLikeCount(userEntity.getLikeCount() - 1);
         } else {
             userEntity.getLikedPosts().add(postId);
             postEntity.setLikes(postEntity.getLikes() + 1);
+            userEntity.setLikeCount(userEntity.getLikeCount() + 1);
         }
+        challengeService.checkAndUpdateChallengeStatus(userEntity.getId());
         userRepository.save(userEntity);
         postRepository.save(postEntity);
         logger.info(userId + "번 유저의 좋아요 상태 변경완료!");
@@ -93,11 +94,11 @@ public class PostService {
     public PostDTO infinityLikePost(Long userId, Long postId) {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow();
         PostEntity postEntity = postRepository.findById(postId).orElseThrow();
-        if (postEntity.getInfinityLike() == null) {
-            postEntity.setInfinityLike(0L);
-        }
         postEntity.setInfinityLike(postEntity.getInfinityLike() + 1);
+        userEntity.setLikeCount(userEntity.getLikeCount() + 1);
+        challengeService.checkAndUpdateChallengeStatus(userEntity.getId());
         postRepository.save(postEntity);
+        logger.info("해당 게시글 좋아요 추가 완료!");
         return PostDTO.entityToDto(postEntity);
     }
 }
