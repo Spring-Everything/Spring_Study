@@ -22,7 +22,7 @@ public class ChallengeService {
     private final ChallengeRepository challengeRepository;
     private final UserRepository userRepository;
 
-    // 유저 뱃지 상태 업데이트
+    // 유저 챌린지 상태 업데이트
     public ChallengeDTO updateUserBadgeStatus(Long challengeId, StatusEnum status) {
         ChallengeEntity badgeEntity = challengeRepository.findById(challengeId).orElseThrow(() -> new RuntimeException("챌린지 ID가 " + challengeId + "인 뱃지를 찾을 수 없습니다"));
         badgeEntity.setIsAchieved(status);
@@ -34,7 +34,7 @@ public class ChallengeService {
         return ChallengeDTO.entityToDto(updatedBadge);
     }
 
-    // 뱃지 목표 자동 달성
+    // 챌린지 목표 자동 달성
     public void checkAndUpdateChallengeStatus(Long userId) {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("유저의 ID가 " + userId + "인 사용자를 찾을 수 없습니다"));
         int likesCount = userEntity.getLikeCount();

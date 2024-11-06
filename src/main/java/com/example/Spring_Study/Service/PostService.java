@@ -47,6 +47,22 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    // 게시글 제목으로 검색
+    public List<PostDTO> findPostByTitle(String title) {
+        return postRepository.findByTitleContainingIgnoreCase(title)
+                .stream()
+                .map(PostDTO::entityToDto)
+                .collect(Collectors.toList());
+    }
+
+    // 게시글 내용으로 검색
+    public List<PostDTO> findPostByContent(String content) {
+        return postRepository.findByContentContainingIgnoreCase(content)
+                .stream()
+                .map(PostDTO::entityToDto)
+                .collect(Collectors.toList());
+    }
+
     // 게시글 수정
     public PostDTO updatePost(Long userId, Long postId, PostDTO postDTO) {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow();

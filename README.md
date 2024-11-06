@@ -205,52 +205,62 @@
 - @OneToMany 관계로 설정된 challenge 필드는 유저가 가진 도전과제 리스트를 참조하며, mappedBy = "user"는 ChallengeEntity에서 이 필드가 유저를 참조하는 필드임을 나타냄
 - CascadeType.ALL로 설정하여 유저 엔티티에 변화가 있을 때 연관된 도전과제 엔티티에도 함께 반영됨
 - setChallenge 메서드는 도전과제 리스트를 설정하면서 각 도전과제의 유저 필드에 this를 설정하여 양방향 관계를 완성
-  -     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-        private List<ChallengeEntity> challenge;
+-     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+      private List<ChallengeEntity> challenge;
 
-        public void setChallenge(List<ChallengeEntity> challenges) {
-            this.challenge = challenges;
-            if (challenges != null) {
-                challenges.forEach(challenge -> challenge.setUser(this));
-            }
-        }
+      public void setChallenge(List<ChallengeEntity> challenges) {
+          this.challenge = challenges;
+          if (challenges != null) {
+              challenges.forEach(challenge -> challenge.setUser(this));
+          }
+      }
 
 - `entityToDto`
   - 아래와 같이 `UserEntity` 객체를 `UserDTO로` 변환 후
   - `UserEntity`의 도전과제 리스트를 `ChallengeDTO` 리스트로 변환하여 `UserDTO`에 추가
   - 유저가 도전과제를 가지고 있는지 확인하고, 없을 경우 빈 리스트를 반환하여 `NullPointerException`을 방지
-    -     public static UserDTO entityToDto(UserEntity userEntity){
-              List<ChallengeDTO> challengeDTO = userEntity.getChallenge() != null
-                  ? userEntity.getChallenge().stream().map(ChallengeDTO::entityToDto).collect(Collectors.toList())
-                  : Collections.emptyList();
-              return new UserDTO(
-                userEntity.getId(),
-                userEntity.getUid(),
-                userEntity.getPassword(),
-                userEntity.getName(),
-                userEntity.getNickname(),
-                userEntity.getEmail(),
-                userEntity.getPhone(),
-                userEntity.getLikeCount(),
-                challengeDTO
-                );
-              }
+  -     public static UserDTO entityToDto(UserEntity userEntity){
+            List<ChallengeDTO> challengeDTO = userEntity.getChallenge() != null
+                ? userEntity.getChallenge().stream().map(ChallengeDTO::entityToDto).collect(Collectors.toList())
+                : Collections.emptyList();
+            return new UserDTO(
+              userEntity.getId(),
+              userEntity.getUid(),
+              userEntity.getPassword(),
+              userEntity.getName(),
+              userEntity.getNickname(),
+              userEntity.getEmail(),
+              userEntity.getPhone(),
+              userEntity.getLikeCount(),
+              challengeDTO
+              );
+            }
 
 - `dtoToEntity`
   - `UserDTO` 객체를 `UserEntity`로 변환
   - `ChallengeDTO` 리스트를 `ChallengeEntity` 리스트로 변환하여 `UserEntity`의 도전과제 필드에 설정
   - `UserEntity` 객체 생성 후, 도전과제 리스트가 존재하면 `setChallenge` 메서드를 통해 유저와 도전과제 간의 양방향 참조 관계를 설정
-    -     public UserEntity dtoToEntity(){
-              UserEntity userEntity = new UserEntity(id, uid, password, name, nickname, email, phone, likeCount, new HashSet<>(), new ArrayList<>());
-              List<ChallengeEntity> challengeEntity = challenge != null
-                  ? challenge.stream().map(ChallengeDTO::dtoToEntity).collect(Collectors.toList())
-                  : Collections.emptyList();
-              userEntity.setChallenge(challengeEntity);
-              return userEntity;
-          }
+  -     public UserEntity dtoToEntity(){
+            UserEntity userEntity = new UserEntity(id, uid, password, name, nickname, email, phone, likeCount, new HashSet<>(), new ArrayList<>());
+            List<ChallengeEntity> challengeEntity = challenge != null
+                ? challenge.stream().map(ChallengeDTO::dtoToEntity).collect(Collectors.toList())
+                : Collections.emptyList();
+            userEntity.setChallenge(challengeEntity);
+            return userEntity;
+        }
 
 
 - 전체 구조 정리
   1. `entityToDto` 와 `dtoToEntity` 메서드를 통해 엔티티와 DTO 간 변환을 수행하며 양방향 관계를 적절히 유지
   2. `setChallenge` 메서드를 통해 `ChallengeEntity`의 `user` 필드에 현재 `UserEntity` 객체를 설정하여 무한 순환 참조 없이 데이터 조회가 가능하도록 구현
   3. `CascadeType.ALL` 설정으로 유저와 도전과제 간의 관계에서 데이터의 추가, 삭제, 갱신이 유기적으로 구현
+
+### 📚 다대다 관계 / 관계 테이블
+- 🤔 들어가기 전에
+  - 저번 해커톤을 하며 유저가 챌린지에 신청하고 도전하여 보상을 얻는 시스템을 개발하였다
+  - 챌린지 시작 일, 챌린지 달성 여부와 챌린지 성공 날짜 등 조회를 위해 유저 테이블과 챌린지 테이블 사이에 유저챌린지 라는 관계테이블을 하나 생성해서 구현하였다
+  - 여기서 관계 테이블 없이 오직 테이블 간의 다대다 관계로 이 구조가 구현이 가능할까?
+    - 우선 이 구조에 대한 정답은 no인 것 같다
+    - 각 유저마다 챌린지를 달성했는지 여부와 달성시간 등 각각의 데이터가 필요하기 때문이다
+    - 위에서도 알아봤듯 학생과 과목 관계의 예시로 하나의 학생이 여러 과목을 듣고 하나의 과목을 여러 학생이 들을 수 있다면 관계테이블 없이 오직 두 테이블의 다대다 관계로 구현이 가능하지만 (위처럼 개별 데이터가 필요없을 시) 관계 테이블 사용처럼 해도 다대다 관계라 봄
+- 

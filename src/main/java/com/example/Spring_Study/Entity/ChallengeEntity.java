@@ -15,12 +15,12 @@ import java.time.LocalDate;
 public class ChallengeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String title;
-    private String description;
-    private StatusEnum isAchieved;
-    private LocalDate achievedAt;
-    private int requiredLikeCount;
+    private Long id; // 챌린지 아이디
+    private String title; // 챌린지 제목
+    private String description; // 챌린지 설명
+    private StatusEnum isAchieved; // 챌린지 달성 여부
+    private LocalDate achievedAt; // 챌린지 달성 날짜
+    private int requiredLikeCount; // 챌린지 목표 좋아요
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

@@ -35,6 +35,18 @@ public class PostController {
         return ResponseEntity.ok(postService.getAllPosts());
     }
 
+    // 게시글 제목으로 검색
+    @GetMapping("/title")
+    public ResponseEntity<List<PostDTO>> findPostByTitle(@RequestParam String title) {
+        return ResponseEntity.ok(postService.findPostByTitle(title));
+    }
+
+    // 게시글 내용으로 검색
+    @GetMapping("/content")
+    public ResponseEntity<List<PostDTO>> findPostByContent(@RequestParam String content) {
+        return ResponseEntity.ok(postService.findPostByContent(content));
+    }
+
     // 게시글 수정
     @PutMapping("/{userId}/{postId}")
     public ResponseEntity<PostDTO> updatePost(@PathVariable Long userId, @PathVariable Long postId, @RequestBody PostDTO postDTO) {
