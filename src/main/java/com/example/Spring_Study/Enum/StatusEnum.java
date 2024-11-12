@@ -5,5 +5,7 @@ public enum StatusEnum {
     실패,
     진행중,
     대기중,
-    종료
+    종료,
+    참여,
+    불참
 }

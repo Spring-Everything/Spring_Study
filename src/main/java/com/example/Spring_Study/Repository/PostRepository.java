@@ -12,5 +12,5 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     List<PostEntity> findPostByUserId(Long userId);
     List<PostEntity> findByTitleContainingIgnoreCase(String title);
     List<PostEntity> findByContentContainingIgnoreCase(String content);
-//    int countByUserAndDateAfter(@Param("user") UserEntity user, @Param("date") LocalDate date);
+    int countByUserAndDateAfter(@Param("user") UserEntity user, @Param("date") LocalDate date);
 }

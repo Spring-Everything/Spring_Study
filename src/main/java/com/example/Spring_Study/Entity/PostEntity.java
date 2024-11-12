@@ -2,6 +2,7 @@ package com.example.Spring_Study.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate;
 
 @Entity(name = "posts")
 @NoArgsConstructor
@@ -17,6 +18,7 @@ public class PostEntity {
     private String content;
     private int likes = 0;
     private int infinityLike = 0;
+    private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

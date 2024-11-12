@@ -21,6 +21,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final ChallengeService challengeService;
+    private final MissionService missionService;
 
     // 게시글 작성
     public PostDTO createPost(Long userId, PostDTO postDTO) {
@@ -100,8 +101,9 @@ public class PostService {
             userEntity.setLikeCount(userEntity.getLikeCount() + 1);
         }
         challengeService.checkAndUpdateChallengeStatus(userEntity.getId());
-        userRepository.save(userEntity);
+        missionService.checkAndUpdateMissionStatus(userEntity.getId());
         postRepository.save(postEntity);
+        userRepository.save(userEntity);
         logger.info(userId + "번 유저의 좋아요 상태 변경완료!");
         return PostDTO.entityToDto(postEntity);
     }
@@ -113,6 +115,8 @@ public class PostService {
         postEntity.setInfinityLike(postEntity.getInfinityLike() + 1);
         userEntity.setLikeCount(userEntity.getLikeCount() + 1);
         challengeService.checkAndUpdateChallengeStatus(userEntity.getId());
+        missionService.checkAndUpdateMissionStatus(userEntity.getId());
+        userRepository.save(userEntity);
         postRepository.save(postEntity);
         logger.info("해당 게시글 좋아요 추가 완료!");
         return PostDTO.entityToDto(postEntity);

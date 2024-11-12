@@ -24,13 +24,13 @@ public class ChallengeService {
 
     // 유저 챌린지 상태 업데이트
     public ChallengeDTO updateUserBadgeStatus(Long challengeId, StatusEnum status) {
-        ChallengeEntity badgeEntity = challengeRepository.findById(challengeId).orElseThrow(() -> new RuntimeException("챌린지 ID가 " + challengeId + "인 뱃지를 찾을 수 없습니다"));
+        ChallengeEntity badgeEntity = challengeRepository.findById(challengeId).orElseThrow(() -> new RuntimeException("챌린지 ID가 " + challengeId + "인 챌린지를 찾을 수 없습니다"));
         badgeEntity.setIsAchieved(status);
         if (status == StatusEnum.성공) {
             badgeEntity.setAchievedAt(LocalDate.now());
         }
         ChallengeEntity updatedBadge = challengeRepository.save(badgeEntity);
-        logger.info("유저 뱃지 ID {}의 상태가 {}로 업데이트 되었습니다", challengeId, status);
+        logger.info("유저 뱃지 ID{}번의 상태가 {}(으)로 업데이트 되었습니다", challengeId, status);
         return ChallengeDTO.entityToDto(updatedBadge);
     }
 
@@ -44,7 +44,7 @@ public class ChallengeService {
                 challenge.setIsAchieved(StatusEnum.성공);
                 challenge.setAchievedAt(LocalDate.now());
                 challengeRepository.save(challenge);
-                logger.info("유저 ID {}의 뱃지 ID {}가 성공으로 업데이트 되었습니다", userId, challenge.getId());
+                logger.info("유저 ID{}번의 챌린지 ID{}번이 성공으로 업데이트 되었습니다", userId, challenge.getId());
             }
         }
     }
