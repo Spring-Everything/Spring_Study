@@ -36,10 +36,10 @@ public class MissionService {
     public CommandLineRunner createDefaultMissions() {
         return args -> {
             List<MissionEntity> challenges = List.of(
-                    new MissionEntity(null, "[11월 미션] 좋아요 10번 누르기", "11월 미션입니다. 아무 게시글에 좋아요를 누적해서 10번 달면 성공입니다. 이번 달에 게시글 좋아요를 많이 표시하고 미션을 성공해보세요!'", LocalDate.of(2024, 8, 1), LocalDate.of(2024, 8, 31), StatusEnum.진행중, 0, 0, "https://nongburang-images.s3.ap-northeast-2.amazonaws.com/challenge_24_08_7.png"),
-                    new MissionEntity(null, "[11월 미션] 좋아요 100번 누르기", "11월 미션입니다. 아무 게시글에 좋아요를 누적해서 100번 달면 성공입니다. 이번 달에 게시글 좋아요를 많이 표시하고 미션을 성공해보세요!'", LocalDate.of(2024, 8, 1), LocalDate.of(2024, 8, 31), StatusEnum.진행중, 0, 0, "https://nongburang-images.s3.ap-northeast-2.amazonaws.com/challenge_24_08_14.png"),
-                    new MissionEntity(null, "[11월 미션] 좋아요 1000번 누르기", "11월 미션입니다. 아무 게시글에 좋아요를 누적해서 1000번 달면 성공입니다. 이번 달에 게시글 좋아요를 많이 표시하고 미션을 성공해보세요!'", LocalDate.of(2024, 8, 1), LocalDate.of(2024, 8, 31), StatusEnum.진행중, 0, 0, "https://nongburang-images.s3.ap-northeast-2.amazonaws.com/challenge_24_08_20.png"),
-                    new MissionEntity(null, "[11월 미션] 좋아요 10000번 누르기", "11월 미션입니다. 아무 게시글에 좋아요를 누적해서 10000번 달면 성공입니다. 이번 달에 게시글 좋아요를 많이 표시하고 미션을 성공해보세요!'", LocalDate.of(2024, 7, 1), LocalDate.of(2024, 7, 31), StatusEnum.진행중, 0, 0, "https://nongburang-images.s3.ap-northeast-2.amazonaws.com/challenge_24_07_7.png")
+                    new MissionEntity(null, "[11월 미션] 좋아요 10번 누르기", "11월 미션입니다. 아무 게시글에 좋아요를 누적해서 10번 달면 성공입니다. 이번 달에 게시글 좋아요를 많이 표시하고 미션을 성공해보세요!'", LocalDate.of(2024, 11, 1), LocalDate.of(2024, 11, 30), StatusEnum.진행중, 0, 0, "https://nongburang-images.s3.ap-northeast-2.amazonaws.com/challenge_24_08_7.png"),
+                    new MissionEntity(null, "[11월 미션] 좋아요 100번 누르기", "11월 미션입니다. 아무 게시글에 좋아요를 누적해서 100번 달면 성공입니다. 이번 달에 게시글 좋아요를 많이 표시하고 미션을 성공해보세요!'", LocalDate.of(2024, 11, 1), LocalDate.of(2024, 11, 30), StatusEnum.진행중, 0, 0, "https://nongburang-images.s3.ap-northeast-2.amazonaws.com/challenge_24_08_14.png"),
+                    new MissionEntity(null, "[12월 미션] 좋아요 1000번 누르기", "12월 미션입니다. 아무 게시글에 좋아요를 누적해서 1000번 달면 성공입니다. 이번 달에 게시글 좋아요를 많이 표시하고 미션을 성공해보세요!'", LocalDate.of(2024, 12, 1), LocalDate.of(2024, 12, 31), StatusEnum.대기중, 0, 0, "https://nongburang-images.s3.ap-northeast-2.amazonaws.com/challenge_24_08_20.png"),
+                    new MissionEntity(null, "[10월 미션] 좋아요 10000번 누르기", "10월 미션입니다. 아무 게시글에 좋아요를 누적해서 10000번 달면 성공입니다. 이번 달에 게시글 좋아요를 많이 표시하고 미션을 성공해보세요!'", LocalDate.of(2024, 10, 1), LocalDate.of(2024, 10, 31), StatusEnum.종료, 0, 0, "https://nongburang-images.s3.ap-northeast-2.amazonaws.com/challenge_24_07_7.png")
             );
             for (MissionEntity challenge : challenges) {
                 if (missionRepository.findByTitle(challenge.getTitle()).isEmpty()) {
@@ -167,6 +167,11 @@ public class MissionService {
     public UserMissionDTO participateInMission(Long missionId, Long userId) {
         UserEntity user = userRepository.findById(userId).orElseThrow();
         MissionEntity mission = missionRepository.findById(missionId).orElseThrow();
+
+        // 미션이 대기 상태인 경우 참여 불가
+        if (mission.getStatus() == StatusEnum.대기중){
+            throw new RuntimeException("이 미션은 대기중이여서 참여할 수 없습니다");
+        }
 
         // 미션이 종료 상태인 경우 참여 불가
         if (mission.getStatus() == StatusEnum.종료) {

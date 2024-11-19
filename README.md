@@ -8,8 +8,24 @@
 - Gradle - Groovy
 - Java
 - yml
+- IntelliJ
+- VSCode
 
 ## 📝 기록지
+
+### 📚 개발 환경 세팅
+- VSCode에서 스프링 실행시키기
+  - 결론 : 터미널에 `./gradlew bootRun` 명령어를 입력하여 실행
+  - RUN JAVA를 해도 상관없지만 아래와 같이 `java.lang.IllegalArgumentException` 에러 발생 가능
+
+        2024-11-19T15:34:58.116+09:00 ERROR 11844 --- [Spring_Study] [nio-8080-exec-3] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: java.lang.IllegalArgumentException: Name for argument of type [java.lang.Long] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag.] with root cause
+
+        java.lang.IllegalArgumentException: Name for argument of type [java.lang.Long] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag.
+
+  - 원인은 컴파일러 옵션(-parameters) 설정과 VS Code의 빌드 설정 문제로 간단하게 터미널에서 `./gradlew bootRun`을 실행해주면 된다
+  - 중지할땐 ctrl + C -> Y
+  - `./gradlew bootRun` : 이 명령어를 통해 수동으로 빌드 및 동기화 진행 가능. Gradle 빌드 동기화로 VS Code에서 프로젝트를 클론한 후, Gradle 빌드 동기화가 제대로 이루어지지 않았다면, 이 명령어를 통해 수동으로 빌드 및 동기화를 진행하여 해당 에러 해결 가능
+
 ### 📚 자바 상식
 - 변수를 초기화 하지 않았을 때 발생하는 문제 (좋아요 등의 수 증가 등등 ,,, )
   - `NullPointerException` - JVM이 이 null 값을 수치 연산에 사용하려고 시도하여 `NullPointerException`을 발생시키는 것. 그러니 항상 초기화를 시켜주자
